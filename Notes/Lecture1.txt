@@ -1,0 +1,39 @@
+Review		
+	Probability Density Function (PDF)	- Continuous data 	f(x)
+	Probability Mass Function 	 (PMF)	- Discrete data		P(x)
+		- Histogram
+	Delta function: delta(t) = infinity at t, 0 everywhere else (i.e. 1 at t, 0 everywhere else)
+	Joint PDF
+		- P(A,B)=P(A|B)P(B)
+		- P(A,B)=P(B|A)P(A)
+	Mutual Information
+	Conditional Probability
+	Expectation
+	Marginal Distribution:
+		- fx(x)=Integral(f(x,y)dy)	- extract x distribution from joint distribution
+		- fy(y)=Integral(f(x,y)dx)	- extract y distribution from joint distribution
+		- Discrete:
+			fx(x)=SUM(fxy(x,y)) for all values of y
+			fy(y)=SUM(fxy(x,y)) for all values of x
+	Bayes Theorem
+		- P(A|B)=((P(B|A)P(A))/P(B))
+		- P(A|B) = Posterior
+		- P(B|A)=Likelihood
+		- P(A)=Prior
+		- P(B)=Evidence
+	Chain Rule of Joint Probability
+		- P(A,B)=P(A|B)P(B)=P(B|A)P(A)
+		- P(A,B,C)=P(A|B,C)P(B,C)=P(A|B,C)P(B|C)P(C)
+		- P(A,B,C|D)=P(C|D)P(A,B|C,D)
+		- P(x1,x2,...,xn)=Product(P(xi|x1...xi-1))
+
+Probability Distributions in Machine Learning
+	- Binomial	
+	- Gamma	
+	- Bernouli: p(x)=P[X=x]={(q=1-p,x=0),(p,x=1)}
+	- Guassian (normal) Distribution
+	- Poisson Distribution
+	- Exponential
+
+Logistic Regression
+Naive Bayes

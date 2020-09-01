@@ -1,0 +1,33 @@
+CPEG-589 Advanced Deep Learning
+
+Professor Ausif Mahmood, Ph.D.
+mahmood@bridgeport.edu
+
+site:		http://kiwi.bridgeport.edu/cpeg589
+username:	ubstudent
+password:	ubstudent2020
+
+Goal: Cover latest Developments in AI and Deep Learning
+	- Understand latest research papers in top AI Conferences
+
+Challenge: Difficlt Mathematics and Programming
+
+Topics:
+	1. Reinforcement Learning (RL)
+	2. Multi-Agent Reinforcement Learning (MARL)
+	3. Variational Inferance and Representation Learning
+		a. Variation Auto Encoders (VAEs)
+		b. Generative Adversarial Networks (GANs)
+	4. Zero and Few Shot Learning
+		a. Combination of VAEs and GANs
+	5. Adversarial Machine Learning
+	6. Advanced Architectures for Natural Language Processing
+		a. Transformer
+		b. BERT
+		c. ALBERT
+		d. RoBERTa
+		e. XLNET
+		f. REALM
+		g. etc...
+
+Environment:
