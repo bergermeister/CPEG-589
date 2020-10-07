@@ -1,4 +1,6 @@
 import torch
+import torch.nn as nn
+from Utility.Logger import Logger
 from Model.GAN.DC.Generator import Generator
 from Model.GAN.DC.Discriminator import Discriminator
 

@@ -31,7 +31,13 @@
     <Compile Include="Model\GAN\DC\Generator.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Model\GAN\DC\Network.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utility\Configuration.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utility\Logger.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
