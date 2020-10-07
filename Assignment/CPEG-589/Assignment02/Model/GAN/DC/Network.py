@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
+from time import time
 from Utility.Logger import Logger
 from Model.GAN.DC.Generator import Generator
 from Model.GAN.DC.Discriminator import Discriminator
@@ -15,7 +17,7 @@ class Network( object ):
       # binary cross entropy loss and optimizer
       self.loss = nn.BCELoss( )
 
-      self.cuda = "False"
+      self.cuda = False
       self.cuda_index = 0
       # check if cuda is available
       self.check_cuda( args.cuda )
@@ -42,12 +44,11 @@ class Network( object ):
          print( self.cuda )
 
    def train( self, train_loader ):
-      self.t_begin = t.time( )
+      self.t_begin = time( )
       generator_iter = 0
-      #self.file = open("inception_score_graph.txt", "w")
 
       for epoch in range( self.epochs ):
-         self.epoch_start_time = t.time( )
+         self.epoch_start_time = time( )
 
          for i, (images, _) in enumerate(train_loader):
             # Check if round number of batches
@@ -127,17 +128,21 @@ class Network( object ):
                   os.makedirs('training_result_images/')
 
                # Denormalize images and save them in grid 8x8
-               z = Variable(torch.randn(800, 100, 1, 1)).cuda(self.cuda_index)
+               if self.cuda:
+                  z = Variable(torch.randn(800, 100, 1, 1)).cuda(self.cuda_index)
+               else:
+                  z = Variable(torch.randn(800, 100, 1, 1))
+               
                samples = self.G(z)
                samples = samples.mul(0.5).add(0.5)
                samples = samples.data.cpu()[:64]
                grid = utils.make_grid(samples)
                utils.save_image(grid, 'training_result_images/img_generatori_iter_{}.png'.format(str(generator_iter).zfill(3)))
 
-               time = t.time() - self.t_begin
+               elapsed = time( ) - self.t_begin
                #print("Inception score: {}".format(inception_score))
                print("Generator iter: {}".format(generator_iter))
-               print("Time {}".format(time))
+               print("Time {}".format(elapsed))
 
                # Write to file inception_score, gen_iters, time
                #output = str(generator_iter) + " " + str(time) + " " + str(inception_score[0]) + "\n"
@@ -145,37 +150,40 @@ class Network( object ):
 
             if ((i + 1) % 100) == 0:
                print("Epoch: [%2d] [%4d/%4d] D_loss: %.8f, G_loss: %.8f" %
-                     ((epoch + 1), (i + 1), train_loader.dataset.__len__() // self.batch_size, d_loss.data[0], g_loss.data[0]))
+                     ((epoch + 1), (i + 1), train_loader.dataset.__len__() // self.batch_size, d_loss.data.item(), g_loss.data.item())) # d_loss.data[0], g_loss.data[0]))
 
-               z = Variable(torch.randn(self.batch_size, 100, 1, 1).cuda(self.cuda_index))
+               if self.cuda:
+                  z = Variable(torch.randn(self.batch_size, 100, 1, 1).cuda(self.cuda_index))
+               else:
+                  z = Variable(torch.randn(self.batch_size, 100, 1, 1))
 
                # TensorBoard logging
                # Log the scalar values
                info = {
-               'd_loss': d_loss.data[0],
-               'g_loss': g_loss.data[0]
+                  'd_loss': d_loss.data.item( ), # d_loss.data[0],
+                  'g_loss': g_loss.data.item( )  # g_loss.data[0]
                }
 
-            for tag, value in info.items():
-               self.logger.scalar_summary(tag, value, generator_iter)
+               for tag, value in info.items():
+                  self.logger.scalar_summary(tag, value, generator_iter)
 
-            # Log values and gradients of the parameters
-            for tag, value in self.D.named_parameters():
-               tag = tag.replace('.', '/')
-               self.logger.histo_summary(tag, self.to_np(value), generator_iter)
-               self.logger.histo_summary(tag + '/grad', self.to_np(value.grad), generator_iter)
+               # Log values and gradients of the parameters
+               for tag, value in self.D.named_parameters():
+                  tag = tag.replace('.', '/')
+                  self.logger.histo_summary(tag, self.to_np(value), generator_iter)
+                  self.logger.histo_summary(tag + '/grad', self.to_np(value.grad), generator_iter)
 
-            # Log the images while training
-            info = {
-               'real_images': self.real_images(images, self.number_of_images),
-               'generated_images': self.generate_img(z, self.number_of_images)
-            }
+               # Log the images while training
+               info = {
+                  'real_images': self.real_images(images, self.number_of_images),
+                  'generated_images': self.generate_img(z, self.number_of_images)
+               }
 
-            for tag, images in info.items():
-               self.logger.image_summary(tag, images, generator_iter)
+               for tag, images in info.items():
+                  self.logger.image_summary(tag, images, generator_iter)
 
 
-      self.t_end = t.time()
+      self.t_end = time( )
       print('Time of training-{}'.format((self.t_end - self.t_begin)))
       #self.file.close()
 

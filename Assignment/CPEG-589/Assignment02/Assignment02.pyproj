@@ -12,7 +12,7 @@
     <Name>Assignment02</Name>
     <RootNamespace>Assignment02</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>--model DCGAN --is_train True --download True --dataroot datasets/fashion-mnist --dataset fashion-mnist --epochs 30 --cuda True --batch_size 64</CommandLineArguments>
+    <CommandLineArguments>--model DCGAN --is_train True --download True --dataroot datasets/cifar --dataset cifar --epochs 30 --cuda False --batch_size 64</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -35,6 +35,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utility\Configuration.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utility\DataLoader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utility\FashionMNIST.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utility\Logger.py">

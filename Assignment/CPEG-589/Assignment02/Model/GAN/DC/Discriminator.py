@@ -13,21 +13,15 @@ class Discriminator( nn.Module ):
          nn.LeakyReLU( 0.2, inplace = True ),
 
          # State (256x16x16)
-         nn.Conv2d( in_channels = 256, out_channels = 512, kernel_size = 4, stride = 2, padding = 1 ),
-         nn.BatchNorm2d( 512 ),
-         nn.LeakyReLU( 0.2, inplace = True ),
+         ConvLayer( in_channels = 256, out_channels = 512, kernel_size = 4, stride = 2, padding = 1, num_features = 512 ),
 
          # State (512x8x8)
-         nn.Conv2d( in_channels = 512, out_channels = 1024, kernel_size = 4, stride = 2, padding = 1 ),
-         nn.BatchNorm2d( 1024 ),
-         nn.LeakyReLU( 0.2, inplace = True )
+         ConvLayer( in_channels = 512, out_channels = 1024, kernel_size = 4, stride = 2, padding = 1, num_features = 1024 )
       ) # outptut of main module --> State (1024x4x4)
 
       self.output = nn.Sequential(
          nn.Conv2d( in_channels = 1024, out_channels = 1, kernel_size = 4, stride = 1, padding = 0 ),
-         
-         # Output 1
-         nn.Sigmoid( )
+         nn.Sigmoid( ) # Output 1
       )
 
    def forward( self, x ):
@@ -38,3 +32,9 @@ class Discriminator( nn.Module ):
       # Use discriminator for feature extraction then flatten to vector of 16384 features
       x = self.module( x )
       return( x.view( -1, 1024 * 4 * 4 ) )
+
+def ConvLayer( in_channels, out_channels, kernel_size, stride, padding, num_features ):
+   return( nn.Sequential( nn.Conv2d( in_channels = in_channels, out_channels = out_channels, 
+                                     kernel_size = kernel_size, stride = stride, padding = padding ),
+                           nn.BatchNorm2d( num_features ),
+                           nn.LeakyReLU( 0.2, inplace = True ) ) )
