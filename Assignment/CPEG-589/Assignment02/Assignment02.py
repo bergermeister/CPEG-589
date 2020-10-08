@@ -1,5 +1,9 @@
+import torch
 from Utility.Configuration import Configuration
 from Model.GAN.DC.Network import Network as DCGAN
+from Model.GAN.Network import Network as GAN
+from Model.GAN.Generator import Generator as Generator
+from Model.GAN.Discriminator import Discriminator as Discriminator
 from Utility.DataLoader import get_data_loader
 
 #from models.gan import GAN
@@ -10,8 +14,12 @@ from Utility.DataLoader import get_data_loader
 
 def main(args):
    model = None
-   if args.model == 'GAN':
-      model = None # todo: GAN(args)
+   if( args.model == 'GAN' ):
+      G = Generator( args.channels )
+      D = Discriminator( args.channels )
+      optimizerD = torch.optim.Adam( D.parameters(), lr = 0.0002, weight_decay = 0.00001 )
+      optimizerG = torch.optim.Adam( G.parameters(), lr = 0.0002, weight_decay = 0.00001 )
+      model = GAN( G, D, optimizerG, optimizerD, args ) # todo: GAN(args)
    elif args.model == 'DCGAN':
       model = DCGAN( args ) # DCGAN_MODEL(args)
    elif args.model == 'WGAN-CP':
@@ -28,7 +36,7 @@ def main(args):
 
    # Start model training
    if args.is_train == 'True':
-      model.train( train_loader )
+      model.Train( train_loader )
    # start evaluating on test data
    else:
       model.evaluate(test_loader, args.load_D, args.load_G)
