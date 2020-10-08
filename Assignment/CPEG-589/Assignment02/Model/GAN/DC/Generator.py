@@ -30,5 +30,6 @@ class Generator( nn.Module ):
 def ConvLayer( in_channels, out_channels, kernel_size, stride, padding, num_features ):
    return( nn.Sequential( nn.ConvTranspose2d( in_channels = in_channels, out_channels = out_channels, 
                                               kernel_size = kernel_size, stride = stride, padding = padding ),
-                           nn.BatchNorm2d( num_features = num_features ),
-                           nn.ReLU( True ) ) )
+                          nn.BatchNorm2d( num_features = num_features ),
+                          nn.ReLU( True ) ) )
+

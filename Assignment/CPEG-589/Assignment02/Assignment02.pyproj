@@ -43,6 +43,12 @@
     <Compile Include="Model\GAN\Network.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Model\GAN\W\GC.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Model\GAN\W\GP.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utility\Configuration.py">
       <SubType>Code</SubType>
     </Compile>

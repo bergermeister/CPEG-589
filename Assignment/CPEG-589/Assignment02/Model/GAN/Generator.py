@@ -9,7 +9,7 @@ class Generator( nn.Module ):
                                    nn.LeakyReLU( 0.2 ),
                                    nn.Linear( 256, 512 ),
                                    nn.LeakyReLU( 0.2 ),
-                                   nn.Linear( 512, 1024 ),
+                                   nn.Linear( 512, 1024 * channels ),
                                    nn.LeakyReLU( 0.2 ),
                                    nn.Tanh( ) )
 
