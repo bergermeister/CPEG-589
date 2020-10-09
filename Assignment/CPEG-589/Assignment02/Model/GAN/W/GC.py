@@ -1,105 +1,101 @@
+import os
 import torch
 import torch.nn as nn
+from torchvision import utils
+from time import time
 from Model.GAN.Network import Network as GAN
+from Model.GAN.Network import GetInfiniteBatches
+from Model.GAN.DC.Generator import Generator
+from Model.GAN.DC.Discriminator import Discriminator
 
 # Wasserstein Generative Adversarial Network (WGAN) with Gradient Clipping (GC)
 class GC( GAN ):
    def __init__( self, args ):
-      print("WGAN_CP init model.")
+      print( "WGAN-GC Model Initialization" )
+
       # Create Generator and Discriminator
       Gen = Generator( args.channels )
       Dis = Discriminator( args.channels )
       
-      # Create Optimizers using using RMSprop instead of ADAM and WGAN values from paper
+      # Create Optimizers using RMSprop instead of ADAM and WGAN values from paper
       d_optimizer = torch.optim.RMSprop( Dis.parameters( ), lr = 0.00005 )
       g_optimizer = torch.optim.RMSprop( Gen.parameters( ), lr = 0.00005 )
       self.weight_cliping_limit = 0.01
+      super( ).__init__( Gen, Dis, g_optimizer, d_optimizer, args )
 
       # Store iteration counts
-      self.generator_iters = args.generator_iters
-      self.critic_iter = 5
+      self.itersGenerator = args.generator_iters
+      self.itersCritic = 5
 
-   def train(self, train_loader):
-      self.t_begin = t.time()
-      #self.file = open("inception_score_graph.txt", "w")
+   def Train( self, TrainLoader ):
+      self.begin = time( )
 
       # Now batches are callable self.data.next()
-      self.data = self.get_infinite_batches(train_loader)
+      self.data = GetInfiniteBatches( TrainLoader )
 
-      one = torch.FloatTensor([1])
+      one = torch.FloatTensor( [ 1 ] )
       mone = one * -1
-      if self.cuda:
-         one = one.cuda()
-         mone = mone.cuda()
+      if( self.cudaEnable ):
+         one = one.cuda( self.cudaIndex )
+         mone = mone.cuda( self.cudaIndex )
 
-      for g_iter in range(self.generator_iters):
-
+      for iterG in range( self.itersGenerator ):
          # Requires grad, Generator requires_grad = False
-         for p in self.D.parameters():
+         for p in self.D.parameters( ):
             p.requires_grad = True
 
          # Train Dicriminator forward-loss-backward-update self.critic_iter times while 1 Generator forward-loss-backward-update
-         for d_iter in range(self.critic_iter):
-            self.D.zero_grad()
+         for iterD in range( self.itersCritic ):
+            self.D.zero_grad( )
 
             # Clamp parameters to a range [-c, c], c=self.weight_cliping_limit
-            for p in self.D.parameters():
-               p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
+            for p in self.D.parameters( ):
+               p.data.clamp_( -self.weight_cliping_limit, self.weight_cliping_limit )
 
-            images = self.data.__next__()
+            images = self.data.__next__( )
             # Check for batch to have full batch_size
-            if (images.size()[0] != self.batch_size):
+            if( images.size( )[ 0 ] != self.batchSize ):
                continue
 
-            z = torch.rand((self.batch_size, 100, 1, 1))
-
-            if self.cuda:
-               images, z = Variable(images.cuda()), Variable(z.cuda())
-            else:
-               images, z = Variable(images), Variable(z)
-
+            images = self.GetVariable( images )
 
             # Train discriminator
             # WGAN - Training discriminator more iterations than generator
             # Train with real images
-            d_loss_real = self.D(images)
-            d_loss_real = d_loss_real.mean(0).view(1)
-            d_loss_real.backward(one)
+            lossRealD = self.D( images )
+            lossRealD = lossRealD.mean( 0 ).view( 1 )
+            lossRealD.backward( one )
 
             # Train with fake images
-            if self.cuda:
-               z = Variable(torch.randn(self.batch_size, 100, 1, 1)).cuda()
-            else:
-               z = Variable(torch.randn(self.batch_size, 100, 1, 1))
-            fake_images = self.G(z)
-            d_loss_fake = self.D(fake_images)
-            d_loss_fake = d_loss_fake.mean(0).view(1)
-            d_loss_fake.backward(mone)
+            z          = self.GetVariable( torch.randn( self.batchSize, 100, 1, 1 ) )
+            imagesFake = self.G( z )
+            lossFakeD  = self.D( imagesFake )
+            lossFakeD  = lossFakeD.mean( 0 ).view( 1 )
+            lossFakeD.backward( mone )
 
-            d_loss = d_loss_fake - d_loss_real
-            Wasserstein_D = d_loss_real - d_loss_fake
-            self.d_optimizer.step()
-
+            lossD = lossFakeD - lossRealD
+            WassersteinD = lossRealD - lossFakeD
+            self.optimizerD.step( )
 
          # Generator update
-         for p in self.D.parameters():
+         for p in self.D.parameters( ):
             p.requires_grad = False  # to avoid computation
 
-         self.G.zero_grad()
+         self.G.zero_grad( )
 
          # Train generator
          # Compute loss with fake images
-         z = Variable(torch.randn(self.batch_size, 100, 1, 1)).cuda()
-         fake_images = self.G(z)
-         g_loss = self.D(fake_images)
-         g_loss = g_loss.mean().mean(0).view(1)
-         g_loss.backward(one)
-         g_cost = -g_loss
-         self.g_optimizer.step()
+         z = self.GetVariable( torch.randn( self.batchSize, 100, 1, 1 ) )
+         imagesFake = self.G(z)
+         lossG = self.D( imagesFake )
+         lossG = lossG.mean( ).mean( 0 ).view( 1 )
+         lossG.backward( one )
+         costG = -lossG
+         self.optimizerG.step( )
 
          # Saving model and sampling images every 1000th generator iterations
-         if (g_iter) % 1000 == 0:
-            self.save_model()
+         if( ( iterG % 1000 ) == 0 ):
+            self.save_model( )
             # Workaround because graphic card memory can't store more than 830 examples in memory for generating image
             # Therefore doing loop and generating 800 examples and stacking into list of samples to get 8000 generated images
             # This way Inception score is more correct since there are different generated examples from every class of Inception model
@@ -115,55 +111,47 @@ class GC( GAN ):
             # # Feeding list of numpy arrays
             # inception_score = get_inception_score(new_sample_list, cuda=True, batch_size=32,
             #                              resize=True, splits=10)
-
-            if not os.path.exists('training_result_images/'):
-               os.makedirs('training_result_images/')
+            if not os.path.exists( 'training_result_images/' ):
+               os.makedirs( 'training_result_images/' )
 
             # Denormalize images and save them in grid 8x8
-            z = Variable(torch.randn(800, 100, 1, 1)).cuda(self.cuda_index)
-            samples = self.G(z)
-            samples = samples.mul(0.5).add(0.5)
-            samples = samples.data.cpu()[:64]
-            grid = utils.make_grid(samples)
-            utils.save_image(grid, 'training_result_images/img_generatori_iter_{}.png'.format(str(g_iter).zfill(3)))
+            z = self.GetVariable( torch.randn( 800, 100, 1, 1 ) )
+            samples = self.G( z )
+            samples = samples.mul( 0.5 ).add( 0.5 )
+            samples = samples.data.cpu( )[ :64 ]
+            grid = utils.make_grid( samples )
+            utils.save_image( grid, 'training_result_images/img_generatori_iter_{}.png'.format( str( iterG ).zfill( 3 ) ) )
 
             # Testing
-            time = t.time() - self.t_begin
-            #print("Inception score: {}".format(inception_score))
-            print("Generator iter: {}".format(g_iter))
-            print("Time {}".format(time))
-
-            # Write to file inception_score, gen_iters, time
-            #output = str(g_iter) + " " + str(time) + " " + str(inception_score[0]) + "\n"
-            #self.file.write(output)
-
+            elapsed = time( ) - self.begin
+            print( "Generator iter: {}".format( iterG ) )
+            print( "Time {}".format( elapsed ) )
 
             # ============ TensorBoard logging ============#
             # (1) Log the scalar values
             info = {
-               'Wasserstein distance': Wasserstein_D.data[0],
-               'Loss D': d_loss.data[0],
-               'Loss G': g_cost.data[0],
-               'Loss D Real': d_loss_real.data[0],
-               'Loss D Fake': d_loss_fake.data[0]
+               'Wasserstein distance': WassersteinD.data.item( ),
+               'Loss D': lossD.data.item( ),
+               'Loss G': costG.data.item( ),
+               'Loss D Real': lossRealD.data.item( ),
+               'Loss D Fake': lossFakeD.data.item( )
 
             }
 
-            for tag, value in info.items():
-               self.logger.scalar_summary(tag, value, g_iter + 1)
+            for tag, value in info.items( ):
+               self.logger.scalar_summary( tag, value, iterG + 1 )
 
             # (3) Log the images
             info = {
-               'real_images': self.real_images(images, self.number_of_images),
-               'generated_images': self.generate_img(z, self.number_of_images)
+               'real_images': self.real_images( images, self.numberOfImages ),
+               'generated_images': self.generate_img( z, self.numberOfImages )
             }
 
-            for tag, images in info.items():
-               self.logger.image_summary( tag, images, g_iter + 1 )
+            for tag, images in info.items( ):
+               self.logger.image_summary( tag, images, iterG + 1 )
 
-      self.t_end = t.time( )
-      print( 'Time of training-{}'.format( ( self.t_end - self.t_begin ) ) )
-      #self.file.close()
+      self.end = time( )
+      print( 'Time of training-{}'.format( ( self.end - self.begin ) ) )
 
       # Save the trained parameters
       self.save_model( )

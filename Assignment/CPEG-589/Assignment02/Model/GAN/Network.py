@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -62,7 +63,6 @@ class Network( object ):
                break
                
             images     = self.GetVariable( images.view( self.batchSize, -1 ) )
-            z          = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
             realLabels = self.GetVariable( torch.ones( self.batchSize ) )
             fakeLabels = self.GetVariable( torch.zeros( self.batchSize ) )
             
@@ -74,9 +74,10 @@ class Network( object ):
             real_score = outputs
 
             # Compute BCE Loss using fake images
+            z          = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
             fakeImages = self.G( z )
-            outputs = self.D( fakeImages )
-            lossFake = self.loss( outputs, fakeLabels )
+            outputs    = self.D( fakeImages )
+            lossFake   = self.loss( outputs, fakeLabels )
             fake_score = outputs
 
             # Optimize discriminator
@@ -125,7 +126,7 @@ class Network( object ):
                z       = self.GetVariable( torch.randn( self.batchSize, 100 ) )               
                samples = self.G( z )
                samples = samples.mul( 0.5 ).add( 0.5 )
-               samples = samples.data.cpu( )[ :self.batchSize ]
+               samples = samples.data.cpu( )[ :64 ]
                grid = utils.make_grid( samples )
                utils.save_image( grid, 'training_result_images/img_generatori_iter_{}.png'.format( str( iterG ).zfill( 3 ) ) )
 
@@ -165,8 +166,8 @@ class Network( object ):
                   self.logger.image_summary(tag, images, iterG)
 
 
-      self.t_end = time( )
-      print('Time of training-{}'.format((self.t_end - self.begin)))
+      self.end = time( )
+      print('Time of training-{}'.format((self.end - self.begin)))
       #self.file.close()
 
       # Save the trained parameters
@@ -242,3 +243,8 @@ class Network( object ):
         
 def ToNP( x ):
    return( x.data.cpu( ).numpy( ) )
+
+def GetInfiniteBatches( DataLoader ):
+   while True:
+      for i, ( images, _ ) in enumerate( DataLoader ):
+         yield images

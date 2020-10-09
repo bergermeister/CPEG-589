@@ -1,6 +1,6 @@
+import os
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 from torchvision import utils
 from time import time
 from Model.GAN.Network import ToNP
@@ -98,7 +98,7 @@ class Network( GAN ):
                z       = self.GetVariable( torch.randn( 800, 100, 1, 1 ) )               
                samples = self.G( z )
                samples = samples.mul( 0.5 ).add( 0.5 )
-               samples = samples.data.cpu( )[ :self.batchSize ]
+               samples = samples.data.cpu( )[ :64 ]
                grid = utils.make_grid( samples )
                utils.save_image( grid, 'training_result_images/img_generatori_iter_{}.png'.format( str( iterG ).zfill( 3 ) ) )
 
@@ -138,8 +138,8 @@ class Network( GAN ):
                   self.logger.image_summary(tag, images, iterG)
 
 
-      self.t_end = time( )
-      print('Time of training-{}'.format((self.t_end - self.begin)))
+      self.end = time( )
+      print('Time of training-{}'.format((self.end - self.begin)))
       #self.file.close()
 
       # Save the trained parameters

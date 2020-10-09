@@ -12,7 +12,7 @@
     <Name>Assignment02</Name>
     <RootNamespace>Assignment02</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>--model DCGAN --is_train True --download True --dataroot datasets/cifar --dataset cifar --epochs 5 --cuda False --batch_size 64</CommandLineArguments>
+    <CommandLineArguments>--model WGAN-GC --is_train True --download True --dataroot datasets/cifar --dataset cifar --generator_iters 40000 --cuda False --batch_size 64</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

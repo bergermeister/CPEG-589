@@ -6,7 +6,7 @@ class Configuration( object ):
    def __init__( self ):
       parser = argparse.ArgumentParser( description = "CPEG-589 Implementation of GAN models using PyTorch" )
        
-      parser.add_argument('--model', type=str, default='DCGAN', choices=['GAN', 'DCGAN', 'WGAN-CP', 'WGAN-GP'])
+      parser.add_argument('--model', type=str, default='DCGAN', choices=['GAN', 'DCGAN', 'WGAN-GC', 'WGAN-GP'])
       parser.add_argument('--is_train', type=str, default='True')
       parser.add_argument('--dataroot', required=True, help='path to dataset')
       parser.add_argument('--dataset', type=str, default='mnist', choices=['mnist', 'fashion-mnist', 'cifar', 'stl10'],
