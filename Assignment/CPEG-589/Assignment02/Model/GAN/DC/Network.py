@@ -11,16 +11,12 @@ from Model.GAN.DC.Discriminator import Discriminator
 # Deep Convolutional (DC) Generative Adversarial Network (GAN)
 class Network( GAN ):
    def __init__( self, args ):
-      print("DCGAN model initalization.")
-
-      # Create Generator and Discriminator
-      Gen = Generator( args.channels )
-      Dis = Discriminator( args.channels )
-
-      # Using lower learning rate than suggested by (ADAM authors) lr=0.0002  and Beta_1 = 0.5 instead od 0.9 works better [Radford2015]
-      d_optimizer = torch.optim.Adam( Dis.parameters( ), lr = 0.0002, betas = ( 0.5, 0.999 ) )
-      g_optimizer = torch.optim.Adam( Gen.parameters( ), lr = 0.0002, betas = ( 0.5, 0.999 ) )
-      super( ).__init__( Gen, Dis, g_optimizer, d_optimizer, args )
+      super( ).__init__( Generator( args.channels ), 
+                         Discriminator( args.channels ), 
+                         None, None, args )
+      print("DCGAN Model Initalization")
+      self.optimizerG = torch.optim.Adam( self.G.parameters( ), lr = 0.0002, betas = ( 0.5, 0.999 ) )
+      self.optimizerD = torch.optim.Adam( self.D.parameters( ), lr = 0.0002, betas = ( 0.5, 0.999 ) )
 
    def Train( self, loader ):
       self.begin = time( )
@@ -35,7 +31,6 @@ class Network( GAN ):
                break
                
             images     = self.GetVariable( images )
-            z          = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ) )
             realLabels = self.GetVariable( torch.ones( self.batchSize ) )
             fakeLabels = self.GetVariable( torch.zeros( self.batchSize ) )
             
@@ -47,9 +42,10 @@ class Network( GAN ):
             real_score = outputs
 
             # Compute BCE Loss using fake images
+            z          = self.GetVariable( torch.randn( ( self.batchSize, 100, 1, 1 ) ) )
             fakeImages = self.G( z )
-            outputs = self.D( fakeImages )
-            lossFake = self.loss( outputs, fakeLabels )
+            outputs    = self.D( fakeImages )
+            lossFake   = self.loss( outputs, fakeLabels )
             fake_score = outputs
 
             # Optimize discriminator
@@ -60,7 +56,7 @@ class Network( GAN ):
 
             # Train generator
             # Compute loss with fake images
-            z = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ) )
+            z = self.GetVariable( torch.randn( ( self.batchSize, 100, 1, 1 ) ) )
             fakeImages = self.G( z )
             outputs    = self.D( fakeImages )
             lossG      = self.loss( outputs, realLabels )
