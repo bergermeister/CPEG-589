@@ -74,7 +74,7 @@ class Network( object ):
             real_score = outputs
 
             # Compute BCE Loss using fake images
-            z          = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
+            z          = self.GetVariable( torch.randn( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
             fakeImages = self.G( z )
             outputs    = self.D( fakeImages )
             lossFake   = self.loss( outputs, fakeLabels )
@@ -88,7 +88,7 @@ class Network( object ):
 
             # Train generator
             # Compute loss with fake images
-            z          = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
+            z          = self.GetVariable( torch.randn( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
             fakeImages = self.G( z )
             outputs    = self.D( fakeImages )
             lossG      = self.loss( outputs, realLabels )
@@ -138,7 +138,7 @@ class Network( object ):
                print( "Epoch: [%2d] [%4d/%4d] D_loss: %.8f, G_loss: %.8f" %
                       ( ( epoch + 1 ), ( i + 1 ), loader.dataset.__len__( ) // self.batchSize, lossD.data.item( ), lossG.data.item( ) ) )
                
-               z = self.GetVariable( torch.rand( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
+               z = self.GetVariable( torch.randn( ( self.batchSize, 100, 1, 1 ) ).view( self.batchSize, -1 ) )
 
                # TensorBoard logging
                # Log the scalar values
