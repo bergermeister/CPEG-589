@@ -41,5 +41,4 @@ def main(args):
 
 if __name__ == '__main__':
    config = Configuration( )
-   print( config.Arguments.cuda )
    main( config.Arguments )
