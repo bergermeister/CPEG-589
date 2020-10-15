@@ -8,7 +8,7 @@ from time import time
 from Model.GAN.Network import Network as GAN
 from Model.GAN.Network import GetInfiniteBatches
 from Model.GAN.DC.Generator import Generator
-from Model.GAN.DC.Discriminator import Discriminator
+from Model.GAN.W.DiscriminatorGP import Discriminator
 
 # Wasserstein Generative Adversarial Network (WGAN) with Gradient Penalty (GP)
 class GP( GAN ):
@@ -31,7 +31,6 @@ class GP( GAN ):
 
    def Train( self, TrainLoader ):
       self.begin = time( )
-      self.file = open( "inception_score_graph.txt", "w" )
 
       # Now batches are callable self.data.next()
       self.data = GetInfiniteBatches( TrainLoader )
@@ -91,7 +90,7 @@ class GP( GAN ):
          z = self.GetVariable( torch.randn( self.batchSize, 100, 1, 1 ) )
          imagesFake = self.G(z)
          lossG = self.D( imagesFake )
-         lossG = lossG.mean( ).mean( )
+         lossG = lossG.mean( )
          lossG.backward( mone )
          costG = -lossG
          self.optimizerG.step( )
@@ -153,7 +152,7 @@ class GP( GAN ):
             for tag, images in info.items( ):
                self.logger.image_summary( tag, images, iterG + 1 )
 
-      self.end = t.time( )
+      self.end = time( )
       print( 'Time of training-{}'.format( ( self.end - self.begin ) ) )
 
       # Save the trained parameters
@@ -171,10 +170,7 @@ class GP( GAN ):
          interpolated = interpolated.cuda( self.cudaIndex )
 
       # define it to calculate gradient
-      if( self.cudaEnable ):
-         interpolated = Variable( interpolated, requires_grad = True ).cuda( self.cudaIndex )
-      else:
-         interpolated = Variable( interpolated, requires_grad = True )
+      interpolated = Variable( interpolated, requires_grad = True )
 
       # calculate probability of interpolated examples
       prob_interpolated = self.D( interpolated )

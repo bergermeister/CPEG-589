@@ -6,7 +6,7 @@ from time import time
 from Model.GAN.Network import Network as GAN
 from Model.GAN.Network import GetInfiniteBatches
 from Model.GAN.DC.Generator import Generator
-from Model.GAN.DC.Discriminator import Discriminator
+from Model.GAN.W.DiscriminatorGC import Discriminator
 
 # Wasserstein Generative Adversarial Network (WGAN) with Gradient Clipping (GC)
 class GC( GAN ):

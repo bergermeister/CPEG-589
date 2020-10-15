@@ -119,12 +119,14 @@ class Network( object ):
                print( 'Epoch-{}'.format( epoch + 1 ) )
                self.save_model( )
 
-               if not os.path.exists('training_result_images/'):
-                  os.makedirs('training_result_images/')
+               if not os.path.exists('training_result_images'):
+                  os.makedirs('training_result_images')
 
                # Denormalize images and save them in grid 8x8
-               z       = self.GetVariable( torch.randn( self.batchSize, 100 ) )               
+               # self.GetVariable( torch.randn( self.batchSize, 100 ) )        
+               z       = self.GetVariable( torch.randn( self.batchSize, 100 ) )  
                samples = self.G( z )
+               samples = samples.view( self.batchSize, self.C, 32, 32 )
                samples = samples.mul( 0.5 ).add( 0.5 )
                samples = samples.data.cpu( )[ :64 ]
                grid = utils.make_grid( samples )

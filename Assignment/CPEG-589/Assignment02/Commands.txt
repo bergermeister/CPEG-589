@@ -1,0 +1,15 @@
+python Assignment02.py --model GAN --is_train True --download True --dataroot datasets/fashion-mnist --dataset fashion-mnist --epochs 30 --cuda True --batch_size 64
+python Assignment02.py --model GAN --is_train True --download True --dataroot datasets/mnist --dataset mnist --epochs 30 --cuda True --batch_size 64
+python Assignment02.py --model GAN --is_train True --download True --dataroot datasets/cifar --dataset cifar --epochs 30 --cuda True --batch_size 64
+	   
+python Assignment02.py --model DCGAN --is_train True --download True --dataroot datasets/fashion-mnist --dataset fashion-mnist --epochs 30 --cuda True --batch_size 64
+python Assignment02.py --model DCGAN --is_train True --download True --dataroot datasets/mnist --dataset mnist --epochs 30 --cuda True --batch_size 64
+python Assignment02.py --model DCGAN --is_train True --download True --dataroot datasets/cifar --dataset cifar --epochs 30 --cuda True --batch_size 64
+	   
+python Assignment02.py --model WGAN-GC --is_train True --download True --dataroot datasets/fashion-mnist --dataset fashion-mnist --generator_iters 40000 --cuda True --batch_size 64
+python Assignment02.py --model WGAN-GC --is_train True --download True --dataroot datasets/mnist --dataset mnist --generator_iters 40000 --cuda True --batch_size 64
+python Assignment02.py --model WGAN-GC --is_train True --download True --dataroot datasets/cifar --dataset cifar --generator_iters 40000 --cuda True --batch_size 64
+	   
+python Assignment02.py --model WGAN-GP --is_train True --download True --dataroot datasets/fashion-mnist --dataset fashion-mnist --generator_iters 40000 --cuda True --batch_size 64
+python Assignment02.py --model WGAN-GP --is_train True --download True --dataroot datasets/mnist --dataset mnist --generator_iters 40000 --cuda True --batch_size 64
+python Assignment02.py --model WGAN-GP --is_train True --download True --dataroot datasets/cifar --dataset cifar --generator_iters 40000 --cuda True --batch_size 64
